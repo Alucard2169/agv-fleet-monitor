@@ -1,0 +1,49 @@
+import random
+import time 
+import json
+import requests
+from datetime import datetime, timezone
+
+DEVICES = ["agv_arm_01", "agv_arm_02", "agv_arm_03"]
+
+# baseline "normal" ranges per sensor
+BASELINE = {
+        "motor_current_a": (2.0, 4.5),
+        "joint_torque_nm": (10.0, 25.0),
+        "temperature_c": (30.0, 55.0),
+        "vibration_g": (0.05, 0.3),
+        }
+
+
+
+def generate_reading(device_id: str, force_anomaly: bool = False) -> dict:
+    reading = {}
+    for sensor, (low, high) in BASELINE.items():
+        value = random.uniform(low, high)
+        if force_anomaly:
+            # push value well outside normal range
+            value *= random.uniform(1.8, 3.0)
+        reading[sensor] = round(value, 3)
+
+    return {
+            "device_id": device_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            **reading,
+            }
+
+def stream_readings(interval_sec: float = 1.0, anomaly_chance: float = 0.03):
+    """Yield one reading per device per tick, forever"""
+    while True:
+        for device in  DEVICES:
+            force_anomaly = random.random() < anomaly_chance
+            yield generate_reading(device, force_anomaly)
+        time.sleep(interval_sec)
+   
+if __name__ == "__main__":
+    API_URL = "http://localhost:8000/ingest"
+    for reading in stream_readings():
+        try:
+            resp = requests.post(API_URL, json=reading)
+            print(reading, "->", resp.status_code)
+        except requests.exceptions.ConnectionError:
+            print("API not reachable, is uvicorn running?")

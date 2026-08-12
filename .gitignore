@@ -1,0 +1,23 @@
+cat > .gitignore << 'EOF'
+# Python
+venv/
+backend/venv/
+env/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Database (regenerates from the replayer)
+*.db
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Editors / OS
+.vscode/
+.DS_Store
+
+# Env secrets, if you ever add any
+.env
+EOF
