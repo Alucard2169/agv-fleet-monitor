@@ -39,17 +39,22 @@ Isolation Forest React dashboard
 
 agv-fleet-monitor/
 ├── backend/
-│ ├── simulator/generate.py # fake sensor stream generator
-│ ├── models/db.py # SQLAlchemy models + DB session
-│ ├── api/main.py # FastAPI app (ingest, devices, readings)
-│ ├── ai/train.py # Isolation Forest training script
-│ └── requirements.txt
+│   ├── simulator/
+│   │   └── generate.py          # Fake sensor stream generator
+│   ├── models/
+│   │   └── db.py                # SQLAlchemy models + DB session
+│   ├── api/
+│   │   └── main.py              # FastAPI app (ingest, devices, readings)
+│   ├── ai/
+│   │   └── train.py             # Isolation Forest training script
+│   └── requirements.txt
+│
 └── frontend/
-└── src/
-├── api/fleetApi.js # data fetching
-├── hooks/ # useDevices, useReadings (polling)
-└── components/ # DeviceTabs, StatusBar, AnomalyFeed,
-# MetricChart, ChartsGrid, AnomalyDot
+    └── src/
+        ├── api/
+        │   └── fleetApi.js      # Data fetching
+        ├── hooks/               # useDevices, useReadings (polling)
+        └── components/          # DeviceTabs, StatusBar, AnomalyFeed
 
 
 ## Running it locally
