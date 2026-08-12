@@ -3,7 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime
 from pydantic import BaseModel
+import pandas as pd
 import sys, os
+import joblib
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models.db import SessionLocal, SensorReading, init_db, get_db
@@ -17,9 +20,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ai", "model.joblib")
+anomaly_model = None
+FEATURES = ["air_temperature_c", "process_temperature_c", "rotational_speed_rpm", "torque_nm", "tool_wear_min"]
+
 @app.on_event("startup")
 def startup():
     init_db()
+    global anomaly_model
+    if os.path.exists(MODEL_PATH):
+        anomaly_model = joblib.load(MODEL_PATH)
+        print("Anomaly model loaded")
+    else:
+        print("No trained model found — run backend/ai/train.py first")
 
 class ReadingIn(BaseModel):
     device_id: str
@@ -34,10 +47,15 @@ class ReadingIn(BaseModel):
 
 @app.post("/ingest")
 def ingest_reading(reading: ReadingIn, db: Session = Depends(get_db)):
-    # Phase 4 replaces this with a real trained classifier's prediction.
-    # For now, pass through the dataset's real ground-truth label so the
-    # pipeline works end-to-end with real data immediately.
-    is_anomaly = 1 if reading.machine_failure else 0
+    if anomaly_model is not None:
+        features = pd.DataFrame([[
+            reading.air_temperature_c, reading.process_temperature_c,
+            reading.rotational_speed_rpm, reading.torque_nm, reading.tool_wear_min,
+        ]], columns=FEATURES)
+        pred = anomaly_model.predict(features)[0]
+        is_anomaly = 1 if pred == -1 else 0
+    else:
+        is_anomaly = 1 if reading.machine_failure else 0  # fallback until a model is trained
 
     row = SensorReading(
         device_id=reading.device_id,
