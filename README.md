@@ -73,7 +73,7 @@ pip install -r requirements.txt
 cd api && uvicorn main:app --reload --port 8000
 
 # 3. In a new terminal — start the simulator
-cd backend/simulator && python generate.py
+cd backend/simulator && python replay.py
 
 # 4. Let it run ~2 minutes, then train the anomaly model
 cd backend/ai && python train.py
