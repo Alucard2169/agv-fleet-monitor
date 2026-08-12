@@ -10,7 +10,7 @@ CSV_PATH = os.path.join(
 API_URL = "http://localhost:8000/ingest"
 
 def load_data():
-    df = pd.read_csv(CSV_PATH)
+    df = pd.read_csv(CSV_PATH, keep_default_na=False, na_values=[])
     before = len(df)
     df = df.dropna()
     dropped = before - len(df)
