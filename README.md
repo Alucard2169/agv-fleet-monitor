@@ -37,6 +37,7 @@ Isolation Forest React dashboard
 
 ## Project structure
 
+```text
 agv-fleet-monitor/
 ├── backend/
 │   ├── simulator/
@@ -55,6 +56,7 @@ agv-fleet-monitor/
         │   └── fleetApi.js      # Data fetching
         ├── hooks/               # useDevices, useReadings (polling)
         └── components/          # DeviceTabs, StatusBar, AnomalyFeed
+```
 
 
 ## Running it locally
